@@ -1,6 +1,5 @@
 import numpy as np
 import math
-import svr
 
 def tfidf(train_file):
 	idf = {} # word: number of documents with word in it
@@ -33,7 +32,8 @@ def tfidf(train_file):
 	keys = idf.keys()
 	for i in xrange(len(keys)):
 		word_index_lookup[keys[i]] = i
-	tfidf_features = np.zeros((num_docs, len(idf)))
+
+	tfidf_features = []
 
 	# Iterate through the reviews to get frequency counts
 	doc_i = 0
@@ -43,8 +43,13 @@ def tfidf(train_file):
 			if 'review/text: ' in line:
 				line = line[len('review/text: '):]
 				words = line.split()
+				tfidf_features.append(dict())
 				for word in words:
-					tfidf_features[doc_i, word_index_lookup[word]] += (idf[word] / len(words))
+					idx = word_index_lookup[word]
+					if idx not in tfidf_features[-1]:
+						tfidf_features[-1][idx] = (idf[word] / len(words))
+					else:
+						tfidf_features[-1][idx] += (idf[word] / len(words))
 				doc_i += 1
 			line = f.readline()
 
@@ -52,5 +57,6 @@ def tfidf(train_file):
 
 if __name__ == "__main__":
 	''' For unit testing purposes only. ''' 
-	features = tfidf('dataset/small_train.txt')
+	features = tfidf('small_train.txt')
+	print features[0]
 
